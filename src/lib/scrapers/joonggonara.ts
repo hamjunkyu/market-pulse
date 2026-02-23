@@ -64,7 +64,7 @@ export async function scrapeJoonggonara(keyword: string): Promise<Omit<Listing, 
           keyword,
           title: item.title,
           price: item.price,
-          condition: item.state === 3 ? 'used' : 'unknown',
+          condition: 'unknown',
           sold_at: item.sortDate
             ? new Date(item.sortDate).toISOString()
             : new Date().toISOString(),

@@ -50,7 +50,7 @@ export async function scrapeDaangn(keyword: string): Promise<Omit<Listing, 'id' 
         keyword,
         title: article.title,
         price,
-        condition: article.status === 'Closed' ? 'used' : 'unknown',
+        condition: 'unknown',
         sold_at: article.createdAt
           ? new Date(article.createdAt).toISOString()
           : new Date().toISOString(),

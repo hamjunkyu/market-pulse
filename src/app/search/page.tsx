@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, Suspense } from 'react'
+import { useEffect, useState, useCallback, useRef, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import SearchBar from '@/components/SearchBar'
 import FilterBar from '@/components/FilterBar'
@@ -23,9 +23,11 @@ function SearchContent() {
   const [loading, setLoading] = useState(true)
   const [scraping, setScraping] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const requestIdRef = useRef(0)
 
   const fetchData = useCallback(async () => {
     if (!keyword) return
+    const requestId = ++requestIdRef.current
     setLoading(true)
     setError(null)
     try {
@@ -33,6 +35,8 @@ function SearchContent() {
       const res = await fetch(`/api/search?${params}`)
       if (!res.ok) throw new Error('검색 실패')
       const result: SearchResult = await res.json()
+
+      if (requestId !== requestIdRef.current) return
       setData(result)
 
       // 캐시 만료 또는 신규 키워드면 백그라운드 수집
@@ -43,21 +47,33 @@ function SearchContent() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ keyword }),
         })
-          .then(() => {
-            // 수집 완료 후 데이터 재조회
-            return fetch(`/api/search?${params}`)
+          .then(res => {
+            if (!res.ok) throw new Error('수집 실패')
+            // 수집 완료 후 현재 필터 기준으로 재조회
+            const freshParams = new URLSearchParams(window.location.search)
+            return fetch(`/api/search?${freshParams}`)
           })
-          .then(res => res.json())
+          .then(res => {
+            if (!res.ok) throw new Error('재조회 실패')
+            return res.json()
+          })
           .then((freshData: SearchResult) => {
+            if (requestId !== requestIdRef.current) return
             setData(freshData)
             setScraping(false)
           })
-          .catch(() => setScraping(false))
+          .catch(() => {
+            if (requestId === requestIdRef.current) setScraping(false)
+          })
       }
     } catch {
-      setError('데이터를 불러오는 중 오류가 발생했습니다.')
+      if (requestId === requestIdRef.current) {
+        setError('데이터를 불러오는 중 오류가 발생했습니다.')
+      }
     } finally {
-      setLoading(false)
+      if (requestId === requestIdRef.current) {
+        setLoading(false)
+      }
     }
   }, [keyword, platform, days, condition])
 

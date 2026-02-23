@@ -15,7 +15,8 @@ export async function getLastScrapedAt(keyword: string): Promise<Date | null> {
 // 수집 완료 후 메타데이터 업데이트 (upsert + count 증가를 단일 RPC로 처리)
 export async function updateScrapedAt(keyword: string): Promise<void> {
   const db = createServerClient()
-  await db.rpc('upsert_scrape_meta', { kw: keyword })
+  const { error } = await db.rpc('upsert_scrape_meta', { kw: keyword })
+  if (error) throw error
 }
 
 // 캐시가 만료됐는지 확인
@@ -33,6 +34,6 @@ export async function getRecentKeywords(): Promise<string[]> {
   const { data } = await db
     .from('search_queries')
     .select('keyword')
-    .gte('created_at', since.toISOString())
+    .gte('last_scraped_at', since.toISOString())
   return data?.map(r => r.keyword) ?? []
 }

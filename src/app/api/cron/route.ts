@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
         processed++
 
         if (processed < keywords.length) {
-          await randomDelay(2000, 2000)
+          await randomDelay(2000, 5000)
         }
       } catch (e) {
         console.error(`Cron: "${keyword}" 수집 실패:`, e)
