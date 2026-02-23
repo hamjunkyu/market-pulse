@@ -30,7 +30,7 @@ export async function scrapeDaangn(keyword: string): Promise<Omit<Listing, 'id' 
     const html = await res.text()
 
     // window.__remixContext JSON 추출
-    const remixMatch = html.match(/window\.__remixContext\s*=\s*(\{.*?\});/s)
+    const remixMatch = html.match(/window\.__remixContext\s*=\s*(\{[\s\S]*?\});/)
     if (!remixMatch) {
       console.error('당근마켓: __remixContext를 찾을 수 없음')
       return []
