@@ -27,7 +27,19 @@ export function calcStats(prices: number[]): PriceStats {
   }
 }
 
-// 날짜별 평균가 트렌드 생성
+// IQR 필터링된 평균 계산 (내부 헬퍼)
+function iqrAvg(prices: number[]): number {
+  if (prices.length === 0) return 0
+  const sorted = [...prices].sort((a, b) => a - b)
+  const q1 = sorted[Math.floor(sorted.length * 0.25)]
+  const q3 = sorted[Math.floor(sorted.length * 0.75)]
+  const iqr = q3 - q1
+  const filtered = sorted.filter(p => p >= q1 - 1.5 * iqr && p <= q3 + 1.5 * iqr)
+  if (filtered.length === 0) return 0
+  return Math.round(filtered.reduce((s, p) => s + p, 0) / filtered.length)
+}
+
+// 날짜별 평균가 트렌드 생성 (IQR 이상치 제거 적용)
 export function calcTrend(listings: Listing[]): TrendPoint[] {
   const byDate: Record<string, number[]> = {}
   for (const l of listings) {
@@ -39,7 +51,7 @@ export function calcTrend(listings: Listing[]): TrendPoint[] {
   return Object.entries(byDate)
     .map(([date, prices]) => ({
       date,
-      avg: Math.round(prices.reduce((s, p) => s + p, 0) / prices.length),
+      avg: iqrAvg(prices),
       count: prices.length,
     }))
     .sort((a, b) => a.date.localeCompare(b.date))

@@ -19,3 +19,4 @@ export const SCRAPE_CACHE_TTL_HOURS = 6   // 6시간 캐시
 export const MAX_ITEMS_PER_PLATFORM = 100  // 플랫폼당 최대 수집 건수
 export const DELAY_MIN_MS = 500            // 최소 딜레이 (API 호출이므로 짧게)
 export const DELAY_MAX_MS = 1500           // 최대 딜레이
+export const MIN_PRICE = 1000              // 최소 가격 (1원, 100원 등 미끼글 제거)

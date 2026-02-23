@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { normalizeKeyword } from '@/lib/utils/normalizer'
+import { isNoiseListing } from '@/lib/utils/titleFilter'
 import { getListings } from '@/lib/db/listings'
 import { getLastScrapedAt, isStale } from '@/lib/db/queries'
 import { calcStats, calcTrend } from '@/lib/utils/priceStats'
@@ -41,7 +42,8 @@ export async function GET(req: NextRequest) {
     }
 
     const lastScrapedAt = await getLastScrapedAt(keyword)
-    const listings = await getListings(keyword, filters)
+    const rawListings = await getListings(keyword, filters)
+    const listings = rawListings.filter(l => !isNoiseListing(l.title))
     const prices = listings.map(l => l.price)
 
     const result: SearchResult = {

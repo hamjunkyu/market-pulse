@@ -1,4 +1,5 @@
 import { createServerClient } from '@/lib/supabase/server'
+import { MIN_PRICE } from '@/constants'
 import type { Listing, SearchFilters } from '@/types'
 
 // 수집 결과 저장 (중복 URL은 무시)
@@ -27,6 +28,7 @@ export async function getListings(
     .select('*')
     .eq('keyword', keyword)
     .gte('sold_at', since.toISOString())
+    .gte('price', MIN_PRICE)
     .order('sold_at', { ascending: false })
     .limit(500)
 

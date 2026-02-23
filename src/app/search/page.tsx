@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef, Suspense } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import SearchBar from '@/components/SearchBar'
 import FilterBar from '@/components/FilterBar'
@@ -10,6 +10,7 @@ import ListingTable from '@/components/ListingTable'
 import LoadingState from '@/components/LoadingState'
 import EmptyState from '@/components/EmptyState'
 import ErrorState from '@/components/ErrorState'
+import { calcStats, calcTrend } from '@/lib/utils/priceStats'
 import type { SearchResult } from '@/types'
 
 function SearchContent() {
@@ -18,6 +19,7 @@ function SearchContent() {
   const platform = searchParams.get('platform') || 'all'
   const days = searchParams.get('days') || '30'
   const condition = searchParams.get('condition') || 'all'
+  const exclude = searchParams.get('exclude') || ''
 
   const [data, setData] = useState<SearchResult | null>(null)
   const [loading, setLoading] = useState(true)
@@ -81,6 +83,28 @@ function SearchContent() {
     fetchData()
   }, [fetchData])
 
+  // 제외 키워드 클라이언트 필터링 + 통계 재계산 (Hook은 early return 전에 호출)
+  const filtered = useMemo(() => {
+    if (!data) return null
+    const excludeTerms = exclude
+      .split(',')
+      .map(s => s.trim().toLowerCase())
+      .filter(Boolean)
+
+    if (excludeTerms.length === 0) return data
+
+    const listings = data.listings.filter(
+      l => !excludeTerms.some(term => l.title.toLowerCase().includes(term))
+    )
+    const prices = listings.map(l => l.price)
+    return {
+      ...data,
+      stats: calcStats(prices),
+      trend: calcTrend(listings),
+      listings,
+    }
+  }, [data, exclude])
+
   if (!keyword) {
     return <EmptyState keyword="" />
   }
@@ -93,7 +117,7 @@ function SearchContent() {
     return <ErrorState message={error} />
   }
 
-  if (!data || (data.listings.length === 0 && !scraping)) {
+  if (!filtered || (filtered.listings.length === 0 && !scraping)) {
     return <EmptyState keyword={keyword} />
   }
 
@@ -107,9 +131,9 @@ function SearchContent() {
           </div>
         </div>
       )}
-      <PriceSummaryCards stats={data.stats} />
-      <PriceTrendChart trend={data.trend} />
-      <ListingTable listings={data.listings} />
+      <PriceSummaryCards stats={filtered.stats} />
+      <PriceTrendChart trend={filtered.trend} />
+      <ListingTable listings={filtered.listings} />
     </div>
   )
 }

@@ -5,7 +5,7 @@ import { POPULAR_KEYWORDS } from '@/constants'
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+    <main className="min-h-[calc(100vh-3rem)] bg-white flex flex-col items-center justify-center px-4">
       <div className="w-full max-w-2xl flex flex-col items-center gap-8">
         <header className="text-center">
           <h1 className="text-3xl font-bold mb-2">중고 시세 조회기</h1>

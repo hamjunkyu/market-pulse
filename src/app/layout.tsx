@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 
@@ -33,6 +34,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm">
+          <div className="max-w-4xl mx-auto px-4 h-12 flex items-center">
+            <Link href="/" className="text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-colors">
+              중고 시세 조회기
+            </Link>
+          </div>
+        </header>
         {children}
       </body>
     </html>
