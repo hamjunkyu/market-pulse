@@ -41,9 +41,17 @@ export default function ListingTable({ listings }: Props) {
     const copy = [...listings]
     switch (sort) {
       case 'date_desc':
-        return copy.sort((a, b) => (b.sold_at ?? '').localeCompare(a.sold_at ?? ''))
+        return copy.sort((a, b) => {
+          if (!a.sold_at) return 1
+          if (!b.sold_at) return -1
+          return b.sold_at.localeCompare(a.sold_at)
+        })
       case 'date_asc':
-        return copy.sort((a, b) => (a.sold_at ?? '').localeCompare(b.sold_at ?? ''))
+        return copy.sort((a, b) => {
+          if (!a.sold_at) return 1
+          if (!b.sold_at) return -1
+          return a.sold_at.localeCompare(b.sold_at)
+        })
       case 'price_asc':
         return copy.sort((a, b) => a.price - b.price)
       case 'price_desc':

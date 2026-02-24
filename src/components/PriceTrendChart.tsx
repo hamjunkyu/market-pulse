@@ -61,14 +61,12 @@ export default function PriceTrendChart({ trend }: Props) {
               fontSize={12}
               width={60}
             />
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             <Tooltip
-              formatter={(value: any) => {
-                const num = Number(value)
-                if (isNaN(num)) return ['', '']
-                return [num.toLocaleString('ko-KR') + '원', '평균가']
+              formatter={(value: number | undefined) => {
+                if (value == null) return ['', '']
+                return [value.toLocaleString('ko-KR') + '원', '평균가']
               }}
-              labelFormatter={(label: any) => {
+              labelFormatter={(label: React.ReactNode) => {
                 const d = new Date(String(label))
                 return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`
               }}

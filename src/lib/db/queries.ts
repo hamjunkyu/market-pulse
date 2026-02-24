@@ -4,11 +4,12 @@ import { SCRAPE_CACHE_TTL_HOURS } from '@/constants'
 // 마지막 수집 시각 조회
 export async function getLastScrapedAt(keyword: string): Promise<Date | null> {
   const db = createServerClient()
-  const { data } = await db
+  const { data, error } = await db
     .from('search_queries')
     .select('last_scraped_at')
     .eq('keyword', keyword)
     .single()
+  if (error && error.code !== 'PGRST116') throw error // PGRST116 = no rows
   return data?.last_scraped_at ? new Date(data.last_scraped_at) : null
 }
 
@@ -31,9 +32,10 @@ export async function getRecentKeywords(): Promise<string[]> {
   const db = createServerClient()
   const since = new Date()
   since.setDate(since.getDate() - 7)
-  const { data } = await db
+  const { data, error } = await db
     .from('search_queries')
     .select('keyword')
     .gte('last_scraped_at', since.toISOString())
+  if (error) throw error
   return data?.map(r => r.keyword) ?? []
 }

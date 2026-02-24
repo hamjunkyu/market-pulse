@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Select,
@@ -21,6 +21,10 @@ export default function FilterBar() {
   const exclude = searchParams.get('exclude') || ''
 
   const [excludeInput, setExcludeInput] = useState(exclude)
+
+  useEffect(() => {
+    setExcludeInput(exclude)
+  }, [exclude])
 
   const updateFilter = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString())

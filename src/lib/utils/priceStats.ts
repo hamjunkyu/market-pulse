@@ -1,22 +1,35 @@
 import type { Listing, PriceStats, TrendPoint } from '@/types'
 import { format } from 'date-fns'
 
-// IQR 방식으로 이상치 제거 후 통계 계산
-export function calcStats(prices: number[]): PriceStats {
-  if (prices.length === 0) {
-    return { avg: 0, min: 0, max: 0, median: 0, count: 0 }
-  }
+// IQR 방식으로 이상치를 제거한 배열 반환 (공통 헬퍼)
+function filterByIQR(prices: number[]): number[] {
+  if (prices.length === 0) return []
   const sorted = [...prices].sort((a, b) => a - b)
   const q1 = sorted[Math.floor(sorted.length * 0.25)]
   const q3 = sorted[Math.floor(sorted.length * 0.75)]
   const iqr = q3 - q1
-  const filtered = sorted.filter(p => p >= q1 - 1.5 * iqr && p <= q3 + 1.5 * iqr)
+  return sorted.filter(p => p >= q1 - 1.5 * iqr && p <= q3 + 1.5 * iqr)
+}
+
+// IQR 필터링 후 평균 계산
+function iqrAvg(prices: number[]): number {
+  const filtered = filterByIQR(prices)
+  if (filtered.length === 0) return 0
+  return Math.round(filtered.reduce((s, p) => s + p, 0) / filtered.length)
+}
+
+// IQR 이상치 제거 후 통계 계산
+export function calcStats(prices: number[]): PriceStats {
+  const filtered = filterByIQR(prices)
   if (filtered.length === 0) {
     return { avg: 0, min: 0, max: 0, median: 0, count: 0 }
   }
 
   const avg = Math.round(filtered.reduce((s, p) => s + p, 0) / filtered.length)
-  const median = filtered[Math.floor(filtered.length / 2)]
+  const mid = Math.floor(filtered.length / 2)
+  const median = filtered.length % 2 === 1
+    ? filtered[mid]
+    : Math.round((filtered[mid - 1] + filtered[mid]) / 2)
 
   return {
     avg,
@@ -25,18 +38,6 @@ export function calcStats(prices: number[]): PriceStats {
     median,
     count: filtered.length,
   }
-}
-
-// IQR 필터링된 평균 계산 (내부 헬퍼)
-function iqrAvg(prices: number[]): number {
-  if (prices.length === 0) return 0
-  const sorted = [...prices].sort((a, b) => a - b)
-  const q1 = sorted[Math.floor(sorted.length * 0.25)]
-  const q3 = sorted[Math.floor(sorted.length * 0.75)]
-  const iqr = q3 - q1
-  const filtered = sorted.filter(p => p >= q1 - 1.5 * iqr && p <= q3 + 1.5 * iqr)
-  if (filtered.length === 0) return 0
-  return Math.round(filtered.reduce((s, p) => s + p, 0) / filtered.length)
 }
 
 // 날짜별 평균가 트렌드 생성 (IQR 이상치 제거 적용)

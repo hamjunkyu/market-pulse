@@ -131,7 +131,12 @@ function SearchContent() {
           </div>
         </div>
       )}
-      <PriceSummaryCards stats={filtered.stats} />
+      <PriceSummaryCards stats={filtered.stats} totalCount={filtered.listings.length} />
+      {filtered.scrapedAt && (
+        <p className="text-xs text-muted-foreground text-right">
+          마지막 수집: {new Date(filtered.scrapedAt).toLocaleString('ko-KR')}
+        </p>
+      )}
       <PriceTrendChart trend={filtered.trend} />
       <ListingTable listings={filtered.listings} />
     </div>
