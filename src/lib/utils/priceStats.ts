@@ -1,8 +1,8 @@
 import type { Listing, PriceStats, TrendPoint } from '@/types'
 import { format } from 'date-fns'
 
-// IQR 방식으로 이상치를 제거한 배열 반환 (공통 헬퍼)
-function filterByIQR(prices: number[]): number[] {
+// IQR 방식으로 이상치를 제거한 배열 반환
+export function filterByIQR(prices: number[]): number[] {
   if (prices.length === 0) return []
   const sorted = [...prices].sort((a, b) => a - b)
   const q1 = sorted[Math.floor(sorted.length * 0.25)]

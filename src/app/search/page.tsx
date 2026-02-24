@@ -11,7 +11,7 @@ import ListingTable from '@/components/ListingTable'
 import LoadingState from '@/components/LoadingState'
 import EmptyState from '@/components/EmptyState'
 import ErrorState from '@/components/ErrorState'
-import { calcStats, calcTrend } from '@/lib/utils/priceStats'
+import { calcStats, calcTrend, filterByIQR } from '@/lib/utils/priceStats'
 import type { SearchResult } from '@/types'
 
 function SearchContent() {
@@ -130,20 +130,28 @@ function SearchContent() {
     return <EmptyState keyword={keyword} />
   }
 
+  const isCollecting = scraping && filtered.listings.length === 0
+
   return (
     <div className="space-y-4">
       {scraping && (
         <div className="text-center py-2.5 bg-indigo-50 rounded-lg">
           <div className="inline-flex items-center gap-2">
             <div className="h-3 w-3 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
-            <span className="text-sm text-indigo-700">새로운 데이터를 수집하고 있습니다...</span>
+            <span className="text-sm text-indigo-700">
+              {isCollecting ? '첫 데이터를 수집하고 있습니다. 잠시만 기다려주세요...' : '새로운 데이터를 수집하고 있습니다...'}
+            </span>
           </div>
         </div>
       )}
-      <PriceSummaryCards stats={filtered.stats} totalCount={filtered.listings.length} listings={filtered.listings} scrapedAt={filtered.scrapedAt} />
-      <PriceTrendChart trend={filtered.trend} />
-      <PriceDistributionChart prices={filtered.listings.map(l => l.price)} avg={filtered.stats.avg} />
-      <ListingTable listings={filtered.listings} />
+      {isCollecting ? <LoadingState /> : (
+        <>
+          <PriceSummaryCards stats={filtered.stats} listings={filtered.listings} scrapedAt={filtered.scrapedAt} />
+          <PriceTrendChart trend={filtered.trend} />
+          <PriceDistributionChart prices={filterByIQR(filtered.listings.map(l => l.price))} avg={filtered.stats.avg} />
+          <ListingTable listings={filtered.listings} />
+        </>
+      )}
     </div>
   )
 }

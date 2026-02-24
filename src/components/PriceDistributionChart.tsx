@@ -22,7 +22,13 @@ function buildBins(prices: number[], binCount: number) {
   const sorted = [...prices].sort((a, b) => a - b)
   const min = sorted[0]
   const max = sorted[sorted.length - 1]
-  if (min === max) return [{ range: `${min.toLocaleString('ko-KR')}원`, count: sorted.length, from: min, to: max }]
+
+  if (min === max) {
+    const label = min >= 10000
+      ? `${Math.round(min / 10000)}만원`
+      : `${min.toLocaleString()}원`
+    return [{ range: label, count: sorted.length, from: min, to: max }]
+  }
 
   const binSize = Math.ceil((max - min) / binCount)
   const bins: { range: string; count: number; from: number; to: number }[] = []
@@ -31,16 +37,12 @@ function buildBins(prices: number[], binCount: number) {
     const from = min + i * binSize
     const to = i === binCount - 1 ? max : from + binSize - 1
     const count = sorted.filter(p => p >= from && (i === binCount - 1 ? p <= to : p < from + binSize)).length
-    if (count === 0 && i > 0 && bins.length > 0) continue // 빈 구간 중간은 유지하되 뒤쪽 빈 구간 제거는 하지 않음
+    if (count === 0 && i > 0 && bins.length > 0) continue
 
-    const formatK = (v: number) => {
-      if (v >= 10000) return `${Math.round(v / 10000)}만`
-      if (v >= 1000) return `${Math.round(v / 1000)}천`
-      return v.toString()
-    }
-
+    const f = Math.round(from / 10000)
+    const t = Math.round(to / 10000)
     bins.push({
-      range: `${formatK(from)}~${formatK(to)}`,
+      range: `${f}~${t}만원`,
       count,
       from,
       to,
@@ -55,7 +57,7 @@ export default function PriceDistributionChart({ prices, avg }: Props) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">가격 분포</CardTitle>
+          <CardTitle className="text-lg">가격 분포</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
@@ -66,31 +68,30 @@ export default function PriceDistributionChart({ prices, avg }: Props) {
     )
   }
 
-  const binCount = Math.min(Math.max(Math.ceil(Math.sqrt(prices.length)), 5), 12)
+  const binCount = Math.min(Math.max(Math.ceil(Math.sqrt(prices.length)), 4), 6)
   const bins = buildBins(prices, binCount)
 
   return (
     <Card className="py-4 gap-2">
       <CardHeader className="px-4">
-        <CardTitle className="text-base">가격 분포</CardTitle>
+        <CardTitle className="text-lg">가격 분포</CardTitle>
       </CardHeader>
       <CardContent className="px-4">
-        <ResponsiveContainer width="100%" height={260}>
-          <BarChart data={bins}>
+        <ResponsiveContainer width="100%" height={280}>
+          <BarChart data={bins} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="range"
-              fontSize={11}
+              fontSize={13}
               interval={0}
-              angle={-30}
-              textAnchor="end"
-              height={50}
+              tickLine={false}
             />
-            <YAxis fontSize={12} allowDecimals={false} />
+            <YAxis fontSize={13} allowDecimals={false} width={35} />
             <Tooltip
-              formatter={(value: number | undefined) => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              formatter={(value: any, _name: any, props: any) => {
                 if (value == null) return ['', '']
-                return [`${value}건`, '거래 수']
+                return [`${value}건`, props?.payload?.range ?? '거래 수']
               }}
             />
             <ReferenceLine

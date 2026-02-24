@@ -5,7 +5,6 @@ import type { Listing, Platform, PriceStats } from '@/types'
 
 interface Props {
   stats: PriceStats
-  totalCount: number
   listings: Listing[]
   scrapedAt?: string | null
 }
@@ -31,7 +30,7 @@ function getPlatformStats(listings: Listing[]) {
     .sort((a, b) => a.avg - b.avg)
 }
 
-export default function PriceSummaryCards({ stats, totalCount, listings, scrapedAt }: Props) {
+export default function PriceSummaryCards({ stats, listings, scrapedAt }: Props) {
   const isEmpty = stats.count === 0
   const platformStats = getPlatformStats(listings)
 
@@ -46,11 +45,6 @@ export default function PriceSummaryCards({ stats, totalCount, listings, scraped
             <p className="text-2xl font-bold text-indigo-600">
               {isEmpty ? EMPTY_MESSAGE : formatPrice(stats.avg)}
             </p>
-            {!isEmpty && (
-              <p className="text-xs text-muted-foreground mt-0.5">
-                중간값 {formatPrice(stats.median)} · 전체 {totalCount}건 중 {stats.count}건 기준
-              </p>
-            )}
           </CardContent>
         </Card>
 
@@ -78,7 +72,9 @@ export default function PriceSummaryCards({ stats, totalCount, listings, scraped
       </div>
 
       {platformStats.length > 1 && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div>
+          <p className="text-xs font-medium text-muted-foreground mb-1.5">플랫폼별 평균가</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {platformStats.map(ps => {
             const info = PLATFORMS[ps.platform]
             return (
@@ -98,6 +94,7 @@ export default function PriceSummaryCards({ stats, totalCount, listings, scraped
               </div>
             )
           })}
+          </div>
         </div>
       )}
 

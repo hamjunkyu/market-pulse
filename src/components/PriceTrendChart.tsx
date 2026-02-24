@@ -1,8 +1,8 @@
 'use client'
 
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -31,7 +31,7 @@ export default function PriceTrendChart({ trend }: Props) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">시세 트렌드</CardTitle>
+          <CardTitle className="text-lg">시세 트렌드</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
@@ -45,21 +45,27 @@ export default function PriceTrendChart({ trend }: Props) {
   return (
     <Card className="py-4 gap-2">
       <CardHeader className="px-4">
-        <CardTitle className="text-base">시세 트렌드</CardTitle>
+        <CardTitle className="text-lg">시세 트렌드</CardTitle>
       </CardHeader>
       <CardContent className="px-4">
         <ResponsiveContainer width="100%" height={280}>
-          <LineChart data={trend}>
+          <AreaChart data={trend} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+            <defs>
+              <linearGradient id="avgGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#4f46e5" stopOpacity={0.2} />
+                <stop offset="100%" stopColor="#4f46e5" stopOpacity={0} />
+              </linearGradient>
+            </defs>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="date"
               tickFormatter={formatDate}
-              fontSize={12}
+              fontSize={13}
             />
             <YAxis
               tickFormatter={formatYAxis}
-              fontSize={12}
-              width={60}
+              fontSize={13}
+              width={45}
             />
             <Tooltip
               formatter={(value: number | undefined) => {
@@ -71,15 +77,16 @@ export default function PriceTrendChart({ trend }: Props) {
                 return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`
               }}
             />
-            <Line
+            <Area
               type="monotone"
               dataKey="avg"
               stroke="#4f46e5"
               strokeWidth={2}
-              dot={{ r: 3 }}
+              fill="url(#avgGradient)"
+              dot={{ r: 3, fill: '#4f46e5' }}
               activeDot={{ r: 5 }}
             />
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>
