@@ -5,33 +5,38 @@ import { POPULAR_KEYWORDS } from '@/constants'
 
 export default function HomePage() {
   return (
-    <main className="min-h-[calc(100vh-3rem)] bg-white flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-2xl flex flex-col items-center gap-8">
-        <header className="text-center">
-          <h1 className="text-3xl font-bold mb-2">중고 시세 조회기</h1>
-          <p className="text-muted-foreground">
-            번개장터·중고나라·당근마켓 시세를 한 번에 확인하세요
+    <main className="min-h-[calc(100vh-3rem)] bg-gradient-to-b from-indigo-50/60 to-background flex flex-col items-center justify-center px-4">
+      <div className="w-full max-w-2xl flex flex-col items-center gap-10">
+        <header className="text-center space-y-3">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">
+            중고 시세
+            <span className="text-indigo-600"> 한눈에</span>
+          </h1>
+          <p className="text-muted-foreground text-base sm:text-lg">
+            번개장터 · 중고나라 · 당근마켓 시세를 한 번에 확인하세요
           </p>
         </header>
 
         <SearchBar />
 
-        <div className="w-full">
-          <p className="text-sm text-muted-foreground mb-2">인기 검색어</p>
-          <div className="flex flex-wrap gap-2">
-            {POPULAR_KEYWORDS.map(keyword => (
-              <Link
-                key={keyword}
-                href={`/search?keyword=${encodeURIComponent(keyword)}`}
-                className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-indigo-50 rounded-full transition-colors"
-              >
-                {keyword}
-              </Link>
-            ))}
+        <div className="w-full space-y-4">
+          <div>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">인기 검색어</p>
+            <div className="flex flex-wrap gap-2">
+              {POPULAR_KEYWORDS.map(keyword => (
+                <Link
+                  key={keyword}
+                  href={`/search?keyword=${encodeURIComponent(keyword)}`}
+                  className="px-3 py-1.5 text-sm border border-border bg-background hover:border-indigo-300 hover:bg-indigo-50 rounded-full transition-all"
+                >
+                  {keyword}
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <RecentSearches />
+          <RecentSearches />
+        </div>
       </div>
     </main>
   )

@@ -43,12 +43,12 @@ export default function PriceTrendChart({ trend }: Props) {
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="py-4 gap-2">
+      <CardHeader className="px-4">
         <CardTitle className="text-base">시세 트렌드</CardTitle>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+      <CardContent className="px-4">
+        <ResponsiveContainer width="100%" height={280}>
           <LineChart data={trend}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis

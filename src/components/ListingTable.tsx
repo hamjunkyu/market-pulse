@@ -29,7 +29,7 @@ function PlatformBadge({ platform }: { platform: Platform }) {
       style={{ borderColor: info.color, color: info.color }}
       className="text-xs"
     >
-      {info.label}
+      {info.icon} {info.label}
     </Badge>
   )
 }
@@ -98,7 +98,7 @@ export default function ListingTable({ listings }: Props) {
                     unoptimized
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-2xl">
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground text-2xl">
                     📦
                   </div>
                 )}

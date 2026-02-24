@@ -131,25 +131,18 @@ function SearchContent() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {scraping && (
-        <div className="text-center py-3 bg-indigo-50 rounded-lg">
+        <div className="text-center py-2.5 bg-indigo-50 rounded-lg">
           <div className="inline-flex items-center gap-2">
             <div className="h-3 w-3 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
             <span className="text-sm text-indigo-700">새로운 데이터를 수집하고 있습니다...</span>
           </div>
         </div>
       )}
-      <PriceSummaryCards stats={filtered.stats} totalCount={filtered.listings.length} listings={filtered.listings} />
-      {filtered.scrapedAt && (
-        <p className="text-xs text-muted-foreground text-right">
-          마지막 수집: {new Date(filtered.scrapedAt).toLocaleString('ko-KR')}
-        </p>
-      )}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <PriceTrendChart trend={filtered.trend} />
-        <PriceDistributionChart prices={filtered.listings.map(l => l.price)} avg={filtered.stats.avg} />
-      </div>
+      <PriceSummaryCards stats={filtered.stats} totalCount={filtered.listings.length} listings={filtered.listings} scrapedAt={filtered.scrapedAt} />
+      <PriceTrendChart trend={filtered.trend} />
+      <PriceDistributionChart prices={filtered.listings.map(l => l.price)} avg={filtered.stats.avg} />
       <ListingTable listings={filtered.listings} />
     </div>
   )
@@ -157,17 +150,19 @@ function SearchContent() {
 
 export default function SearchPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-gradient-to-b from-indigo-50/50 to-background">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="flex flex-col gap-6">
-          <div className="flex justify-center">
+        <div className="flex flex-col gap-4">
+          <div className="bg-card rounded-xl border shadow-sm p-4 space-y-3">
+            <div className="flex justify-center">
+              <Suspense>
+                <SearchBarWithParams />
+              </Suspense>
+            </div>
             <Suspense>
-              <SearchBarWithParams />
+              <FilterBar />
             </Suspense>
           </div>
-          <Suspense>
-            <FilterBar />
-          </Suspense>
           <Suspense fallback={<LoadingState />}>
             <SearchContent />
           </Suspense>

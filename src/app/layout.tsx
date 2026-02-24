@@ -42,6 +42,11 @@ export default function RootLayout({
           </div>
         </header>
         {children}
+        <footer className="border-t py-6 mt-12">
+          <div className="max-w-4xl mx-auto px-4 text-center text-xs text-muted-foreground">
+            번개장터 · 중고나라 · 당근마켓의 공개된 거래 데이터를 수집하여 시세를 제공합니다.
+          </div>
+        </footer>
       </body>
     </html>
   )

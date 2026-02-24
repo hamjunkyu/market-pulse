@@ -7,6 +7,7 @@ interface Props {
   stats: PriceStats
   totalCount: number
   listings: Listing[]
+  scrapedAt?: string | null
 }
 
 function formatPrice(price: number): string {
@@ -30,45 +31,45 @@ function getPlatformStats(listings: Listing[]) {
     .sort((a, b) => a.avg - b.avg)
 }
 
-export default function PriceSummaryCards({ stats, totalCount, listings }: Props) {
+export default function PriceSummaryCards({ stats, totalCount, listings, scrapedAt }: Props) {
   const isEmpty = stats.count === 0
   const platformStats = getPlatformStats(listings)
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="border-indigo-200 border-2">
-          <CardHeader className="pb-2">
+    <div className="space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Card className="border-indigo-200 border-2 py-3 gap-1">
+          <CardHeader className="px-4">
             <CardTitle className="text-sm font-medium text-muted-foreground">평균가</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4">
             <p className="text-2xl font-bold text-indigo-600">
               {isEmpty ? EMPTY_MESSAGE : formatPrice(stats.avg)}
             </p>
             {!isEmpty && (
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 중간값 {formatPrice(stats.median)} · 전체 {totalCount}건 중 {stats.count}건 기준
               </p>
             )}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
+        <Card className="py-3 gap-1">
+          <CardHeader className="px-4">
             <CardTitle className="text-sm font-medium text-muted-foreground">최저가</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4">
             <p className="text-2xl font-bold">
               {isEmpty ? '-' : formatPrice(stats.min)}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
+        <Card className="py-3 gap-1">
+          <CardHeader className="px-4">
             <CardTitle className="text-sm font-medium text-muted-foreground">최고가</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4">
             <p className="text-2xl font-bold">
               {isEmpty ? '-' : formatPrice(stats.max)}
             </p>
@@ -77,33 +78,33 @@ export default function PriceSummaryCards({ stats, totalCount, listings }: Props
       </div>
 
       {platformStats.length > 1 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">플랫폼별 시세</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {platformStats.map(ps => {
-                const info = PLATFORMS[ps.platform]
-                return (
-                  <div
-                    key={ps.platform}
-                    className="flex items-center justify-between p-2 rounded-lg border"
-                    style={{ borderColor: info.color + '40' }}
-                  >
-                    <span className="text-sm font-medium" style={{ color: info.color }}>
-                      {info.label}
-                    </span>
-                    <div className="text-right">
-                      <p className="text-sm font-bold">{formatPrice(ps.avg)}</p>
-                      <p className="text-xs text-muted-foreground">{ps.count}건</p>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {platformStats.map(ps => {
+            const info = PLATFORMS[ps.platform]
+            return (
+              <div
+                key={ps.platform}
+                className="flex items-center justify-between px-3 py-2.5 rounded-lg border-l-[3px]"
+                style={{ borderLeftColor: info.color, backgroundColor: info.color + '0A' }}
+              >
+                <span className="text-sm font-semibold flex items-center gap-1.5">
+                  <span>{info.icon}</span>
+                  <span style={{ color: info.color }}>{info.label}</span>
+                </span>
+                <div className="text-right">
+                  <p className="text-sm font-bold">{formatPrice(ps.avg)}</p>
+                  <p className="text-[11px] text-muted-foreground">{ps.count}건</p>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {scrapedAt && (
+        <p className="text-[11px] text-muted-foreground text-right">
+          마지막 수집: {new Date(scrapedAt).toLocaleString('ko-KR')}
+        </p>
       )}
     </div>
   )

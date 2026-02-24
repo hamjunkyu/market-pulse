@@ -1,7 +1,7 @@
 export const PLATFORMS = {
-  bunjang: { label: '번개장터', color: '#FF6B00' },
-  joonggonara: { label: '중고나라', color: '#00C851' },
-  daangn: { label: '당근마켓', color: '#FF6F0F' },
+  bunjang: { label: '번개장터', icon: '⚡', color: '#FF6B00' },
+  joonggonara: { label: '중고나라', icon: '🏠', color: '#00C851' },
+  daangn: { label: '당근마켓', icon: '🥕', color: '#FF6F0F' },
 } as const
 
 export const POPULAR_KEYWORDS = [

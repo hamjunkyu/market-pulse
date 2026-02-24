@@ -70,12 +70,12 @@ export default function PriceDistributionChart({ prices, avg }: Props) {
   const bins = buildBins(prices, binCount)
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="py-4 gap-2">
+      <CardHeader className="px-4">
         <CardTitle className="text-base">가격 분포</CardTitle>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={250}>
+      <CardContent className="px-4">
+        <ResponsiveContainer width="100%" height={260}>
           <BarChart data={bins}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
