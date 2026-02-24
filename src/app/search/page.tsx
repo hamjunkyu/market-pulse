@@ -6,6 +6,7 @@ import SearchBar from '@/components/SearchBar'
 import FilterBar from '@/components/FilterBar'
 import PriceSummaryCards from '@/components/PriceSummaryCards'
 import PriceTrendChart from '@/components/PriceTrendChart'
+import PriceDistributionChart from '@/components/PriceDistributionChart'
 import ListingTable from '@/components/ListingTable'
 import LoadingState from '@/components/LoadingState'
 import EmptyState from '@/components/EmptyState'
@@ -20,6 +21,14 @@ function SearchContent() {
   const days = searchParams.get('days') || '30'
   const condition = searchParams.get('condition') || 'all'
   const exclude = searchParams.get('exclude') || ''
+
+  // 동적 페이지 타이틀
+  useEffect(() => {
+    if (keyword) {
+      document.title = `${keyword} 시세 | 중고 시세 조회기`
+    }
+    return () => { document.title = '중고 시세 조회기 | 번개장터·중고나라·당근마켓 통합 시세' }
+  }, [keyword])
 
   const [data, setData] = useState<SearchResult | null>(null)
   const [loading, setLoading] = useState(true)
@@ -131,13 +140,16 @@ function SearchContent() {
           </div>
         </div>
       )}
-      <PriceSummaryCards stats={filtered.stats} totalCount={filtered.listings.length} />
+      <PriceSummaryCards stats={filtered.stats} totalCount={filtered.listings.length} listings={filtered.listings} />
       {filtered.scrapedAt && (
         <p className="text-xs text-muted-foreground text-right">
           마지막 수집: {new Date(filtered.scrapedAt).toLocaleString('ko-KR')}
         </p>
       )}
-      <PriceTrendChart trend={filtered.trend} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <PriceTrendChart trend={filtered.trend} />
+        <PriceDistributionChart prices={filtered.listings.map(l => l.price)} avg={filtered.stats.avg} />
+      </div>
       <ListingTable listings={filtered.listings} />
     </div>
   )

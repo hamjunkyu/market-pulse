@@ -85,9 +85,9 @@ export default function ListingTable({ listings }: Props) {
               href={listing.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex gap-3 p-2 sm:p-3 rounded-lg hover:bg-muted/50 transition-colors"
             >
-              <div className="flex-shrink-0 w-[60px] h-[60px] rounded-md overflow-hidden bg-gray-100">
+              <div className="hidden sm:block flex-shrink-0 w-[60px] h-[60px] rounded-md overflow-hidden bg-muted">
                 {listing.thumbnail_url ? (
                   <Image
                     src={listing.thumbnail_url}

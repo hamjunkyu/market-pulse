@@ -46,7 +46,7 @@ export default function FilterBar() {
   return (
     <div className="flex flex-wrap gap-3 items-center">
       <Select value={platform} onValueChange={v => updateFilter('platform', v)}>
-        <SelectTrigger className="w-[140px]">
+        <SelectTrigger className="w-full sm:w-[140px]" aria-label="플랫폼 선택">
           <SelectValue placeholder="플랫폼" />
         </SelectTrigger>
         <SelectContent>
@@ -58,7 +58,7 @@ export default function FilterBar() {
       </Select>
 
       <Select value={days} onValueChange={v => updateFilter('days', v)}>
-        <SelectTrigger className="w-[120px]">
+        <SelectTrigger className="w-full sm:w-[120px]" aria-label="기간 선택">
           <SelectValue placeholder="기간" />
         </SelectTrigger>
         <SelectContent>
@@ -69,7 +69,7 @@ export default function FilterBar() {
       </Select>
 
       <Select value={condition} onValueChange={v => updateFilter('condition', v)}>
-        <SelectTrigger className="w-[120px]">
+        <SelectTrigger className="w-full sm:w-[120px]" aria-label="상태 선택">
           <SelectValue placeholder="상태" />
         </SelectTrigger>
         <SelectContent>
@@ -81,8 +81,9 @@ export default function FilterBar() {
       </Select>
 
       <Input
-        className="w-[220px]"
+        className="w-full sm:w-[220px]"
         placeholder="제외 키워드 (쉼표 구분)"
+        aria-label="제외할 키워드 (쉼표로 구분)"
         value={excludeInput}
         onChange={e => setExcludeInput(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter') applyExclude() }}
