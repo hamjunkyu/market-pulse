@@ -44,6 +44,7 @@ export async function scrapeBunjang(keyword: string): Promise<Omit<Listing, 'id'
         title: item.name,
         price,
         condition: item.used === 2 ? 'new' : item.used === 1 ? 'used' : 'unknown',
+        status: 'selling',
         sold_at: new Date(item.update_time * 1000).toISOString(),
         url: `https://m.bunjang.co.kr/products/${item.pid}`,
         thumbnail_url: thumbnailUrl,

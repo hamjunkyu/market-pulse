@@ -4,6 +4,9 @@ export type Platform = 'bunjang' | 'joonggonara' | 'daangn'
 // 상품 상태
 export type Condition = 'new' | 'like_new' | 'used' | 'unknown'
 
+// 리스팅 상태
+export type ListingStatus = 'selling' | 'reserved' | 'sold' | 'deleted'
+
 // DB: 개별 거래 데이터
 export interface Listing {
   id: string
@@ -12,6 +15,7 @@ export interface Listing {
   title: string
   price: number          // 원화 정수
   condition: Condition
+  status: ListingStatus
   sold_at: string | null  // ISO 8601, null if not sold
   url: string
   thumbnail_url: string | null

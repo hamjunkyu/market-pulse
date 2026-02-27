@@ -35,8 +35,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
-          <div className="max-w-4xl mx-auto px-4 h-12 flex items-center">
-            <Link href="/" className="text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-colors">
+          <div className="max-w-4xl mx-auto px-4 h-14 flex items-center">
+            <Link href="/" className="text-lg font-bold text-indigo-600 hover:text-indigo-700 transition-colors">
               중고 시세 조회기
             </Link>
           </div>

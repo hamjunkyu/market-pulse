@@ -1,6 +1,6 @@
 import { randomDelay } from '@/lib/utils/delay'
 import { DELAY_MIN_MS, DELAY_MAX_MS } from '@/constants'
-import type { Listing, Platform } from '@/types'
+import type { Listing, ListingStatus, Platform } from '@/types'
 
 const PLATFORM: Platform = 'joonggonara'
 const BASE_URL = 'https://web.joongna.com'
@@ -12,6 +12,12 @@ interface JoongnaItem {
   url: string           // 이미지 URL
   state: number         // 0=판매중, 1=예약중, 3=판매완료
   sortDate: string
+}
+
+function mapState(state: number): ListingStatus {
+  if (state === 1) return 'reserved'
+  if (state === 3) return 'sold'
+  return 'selling'
 }
 
 export async function scrapeJoonggonara(keyword: string): Promise<Omit<Listing, 'id' | 'created_at'>[]> {
@@ -65,6 +71,7 @@ export async function scrapeJoonggonara(keyword: string): Promise<Omit<Listing, 
           title: item.title,
           price: item.price,
           condition: 'unknown',
+          status: mapState(item.state),
           sold_at: item.sortDate
             ? new Date(item.sortDate).toISOString()
             : new Date().toISOString(),

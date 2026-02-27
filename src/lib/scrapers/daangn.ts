@@ -1,4 +1,4 @@
-import type { Listing, Platform } from '@/types'
+import type { Listing, ListingStatus, Platform } from '@/types'
 
 const PLATFORM: Platform = 'daangn'
 const SEARCH_URL = 'https://www.daangn.com/kr/buy-sell/s/'
@@ -11,6 +11,12 @@ interface DaangnArticle {
   status: string         // "Ongoing" | "Reserved" | "Closed"
   thumbnail: string
   createdAt: string      // ISO 8601
+}
+
+function mapStatus(status: string): ListingStatus {
+  if (status === 'Reserved') return 'reserved'
+  if (status === 'Closed') return 'sold'
+  return 'selling'
 }
 
 export async function scrapeDaangn(keyword: string): Promise<Omit<Listing, 'id' | 'created_at'>[]> {
@@ -51,6 +57,7 @@ export async function scrapeDaangn(keyword: string): Promise<Omit<Listing, 'id' 
         title: article.title,
         price,
         condition: 'unknown',
+        status: mapStatus(article.status),
         sold_at: article.createdAt
           ? new Date(article.createdAt).toISOString()
           : new Date().toISOString(),

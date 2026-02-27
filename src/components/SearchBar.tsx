@@ -37,7 +37,7 @@ export default function SearchBar({ defaultValue = '' }: SearchBarProps) {
   return (
     <div className="flex w-full max-w-2xl gap-2">
       <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" aria-hidden="true" />
         <Input
           type="text"
           placeholder="검색어를 입력하세요 (예: 아이폰 15)"
@@ -45,13 +45,13 @@ export default function SearchBar({ defaultValue = '' }: SearchBarProps) {
           value={query}
           onChange={e => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="pl-10 h-12 text-base"
+          className="pl-12 h-14 !text-lg"
         />
       </div>
       <Button
         onClick={handleSearch}
         disabled={!query.trim()}
-        className="h-12 px-6 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+        className="h-14 px-8 text-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
       >
         검색
       </Button>

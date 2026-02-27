@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS listings (
   price         INTEGER     NOT NULL CHECK (price > 0),
   condition     VARCHAR(20) NOT NULL DEFAULT 'unknown'
                   CHECK (condition IN ('new', 'like_new', 'used', 'unknown')),
+  status        VARCHAR(20) NOT NULL DEFAULT 'selling'
+                  CHECK (status IN ('selling', 'reserved', 'sold', 'deleted')),
   sold_at       TIMESTAMPTZ,
   url           VARCHAR(1000) NOT NULL,
   thumbnail_url VARCHAR(1000),
@@ -31,6 +33,7 @@ CREATE INDEX IF NOT EXISTS idx_listings_keyword     ON listings(keyword);
 CREATE INDEX IF NOT EXISTS idx_listings_keyword_date ON listings(keyword, sold_at DESC);
 CREATE INDEX IF NOT EXISTS idx_listings_platform    ON listings(platform);
 CREATE INDEX IF NOT EXISTS idx_listings_sold_at     ON listings(sold_at DESC);
+CREATE INDEX IF NOT EXISTS idx_listings_status      ON listings(status);
 
 -- 수집 메타데이터 upsert 함수 (신규: count=1, 기존: count+1)
 CREATE OR REPLACE FUNCTION upsert_scrape_meta(kw TEXT)

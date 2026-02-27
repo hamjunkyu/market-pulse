@@ -5,8 +5,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { normalizeKeyword } from '@/lib/utils/normalizer'
 import { scrapeAll } from '@/lib/scrapers'
-import { upsertListings } from '@/lib/db/listings'
+import { upsertListings, deleteMissingListings } from '@/lib/db/listings'
 import { updateScrapedAt } from '@/lib/db/queries'
+import type { Platform } from '@/types'
 
 const bodySchema = z.object({
   keyword: z.string().min(1).max(200),
@@ -27,6 +28,20 @@ export async function POST(req: NextRequest) {
 
     const listings = await scrapeAll(keyword)
     await upsertListings(listings)
+
+    // 플랫폼별로 수집 범위 내 사라진 리스팅을 DB에서 삭제
+    const byPlatform = Map.groupBy(listings, l => l.platform)
+    for (const [platform, items] of byPlatform) {
+      const urls = items.map(l => l.url)
+      const oldest = items
+        .map(l => l.sold_at)
+        .filter(Boolean)
+        .sort()[0]
+      if (oldest) {
+        await deleteMissingListings(keyword, platform as Platform, urls, oldest)
+      }
+    }
+
     await updateScrapedAt(keyword)
 
     return NextResponse.json({ success: true, count: listings.length })

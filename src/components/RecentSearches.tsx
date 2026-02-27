@@ -30,15 +30,15 @@ export default function RecentSearches() {
 
   return (
     <div>
-      <div className="flex items-center gap-1.5 mb-2">
-        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">최근 검색어</span>
+      <div className="flex items-center gap-1.5 mb-2.5">
+        <Clock className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">최근 검색어</span>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2.5">
         {searches.map(keyword => (
           <span
             key={keyword}
-            className="group inline-flex items-center gap-1 pl-3 pr-1.5 py-1.5 text-sm border border-border bg-background hover:border-indigo-300 hover:bg-indigo-50 rounded-full transition-all"
+            className="group inline-flex items-center gap-1 pl-4 pr-2 py-2 text-[15px] border border-border bg-background hover:border-indigo-300 hover:bg-indigo-50 rounded-full transition-all"
           >
             <Link href={`/search?keyword=${encodeURIComponent(keyword)}`}>
               {keyword}

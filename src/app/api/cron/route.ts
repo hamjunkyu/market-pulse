@@ -4,8 +4,9 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getRecentKeywords, updateScrapedAt } from '@/lib/db/queries'
 import { scrapeAll } from '@/lib/scrapers'
-import { upsertListings } from '@/lib/db/listings'
+import { upsertListings, deleteMissingListings } from '@/lib/db/listings'
 import { randomDelay } from '@/lib/utils/delay'
+import type { Platform } from '@/types'
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
@@ -23,6 +24,19 @@ export async function GET(req: NextRequest) {
       try {
         const listings = await scrapeAll(keyword)
         await upsertListings(listings)
+
+        const byPlatform = Map.groupBy(listings, l => l.platform)
+        for (const [platform, items] of byPlatform) {
+          const urls = items.map(l => l.url)
+          const oldest = items
+            .map(l => l.sold_at)
+            .filter(Boolean)
+            .sort()[0]
+          if (oldest) {
+            await deleteMissingListings(keyword, platform as Platform, urls, oldest)
+          }
+        }
+
         await updateScrapedAt(keyword)
         processed++
 

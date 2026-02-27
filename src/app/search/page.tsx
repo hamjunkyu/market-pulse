@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef, useMemo, Suspense } from 'rea
 import { useSearchParams } from 'next/navigation'
 import SearchBar from '@/components/SearchBar'
 import FilterBar from '@/components/FilterBar'
+import ProductGroupTabs from '@/components/ProductGroupTabs'
 import PriceSummaryCards from '@/components/PriceSummaryCards'
 import PriceTrendChart from '@/components/PriceTrendChart'
 import PriceDistributionChart from '@/components/PriceDistributionChart'
@@ -12,6 +13,7 @@ import LoadingState from '@/components/LoadingState'
 import EmptyState from '@/components/EmptyState'
 import ErrorState from '@/components/ErrorState'
 import { calcStats, calcTrend, filterByIQR } from '@/lib/utils/priceStats'
+import { clusterListings } from '@/lib/utils/clustering'
 import type { SearchResult } from '@/types'
 
 function SearchContent() {
@@ -114,6 +116,43 @@ function SearchContent() {
     }
   }, [data, exclude])
 
+  // 제품 그룹 클러스터링
+  const groups = useMemo(() => {
+    if (!filtered) return []
+    return clusterListings(filtered.listings, keyword)
+  }, [filtered, keyword])
+
+  const [activeGroup, setActiveGroup] = useState<string | null>(null)
+
+  // 데이터 변경 시 그룹 선택 초기화
+  useEffect(() => {
+    setActiveGroup(null)
+  }, [keyword, platform, days, condition, exclude])
+
+  // 선택된 그룹 기준으로 최종 데이터 계산
+  const view = useMemo(() => {
+    if (!filtered) return null
+    if (activeGroup === null || groups.length === 0) {
+      return {
+        listings: filtered.listings,
+        stats: filtered.stats,
+        trend: filtered.trend,
+      }
+    }
+    const group = groups.find(g => g.id === activeGroup)
+    if (!group) return {
+      listings: filtered.listings,
+      stats: filtered.stats,
+      trend: filtered.trend,
+    }
+    const prices = group.listings.map(l => l.price)
+    return {
+      listings: group.listings,
+      stats: calcStats(prices),
+      trend: calcTrend(group.listings),
+    }
+  }, [filtered, activeGroup, groups])
+
   if (!keyword) {
     return <EmptyState keyword="" />
   }
@@ -126,7 +165,7 @@ function SearchContent() {
     return <ErrorState message={error} />
   }
 
-  if (!filtered || (filtered.listings.length === 0 && !scraping)) {
+  if (!filtered || !view || (filtered.listings.length === 0 && !scraping)) {
     return <EmptyState keyword={keyword} />
   }
 
@@ -146,10 +185,16 @@ function SearchContent() {
       )}
       {isCollecting ? <LoadingState /> : (
         <>
-          <PriceSummaryCards stats={filtered.stats} listings={filtered.listings} scrapedAt={filtered.scrapedAt} />
-          <PriceTrendChart trend={filtered.trend} />
-          <PriceDistributionChart prices={filterByIQR(filtered.listings.map(l => l.price))} avg={filtered.stats.avg} />
-          <ListingTable listings={filtered.listings} />
+          <ProductGroupTabs
+            groups={groups}
+            activeGroup={activeGroup}
+            onSelect={setActiveGroup}
+            keyword={keyword}
+          />
+          <PriceSummaryCards stats={view.stats} listings={view.listings} scrapedAt={filtered.scrapedAt} />
+          <PriceTrendChart trend={view.trend} />
+          <PriceDistributionChart prices={filterByIQR(view.listings.map(l => l.price))} avg={view.stats.avg} />
+          <ListingTable listings={view.listings} />
         </>
       )}
     </div>

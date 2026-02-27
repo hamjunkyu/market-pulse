@@ -1,7 +1,7 @@
 import { scrapeBunjang } from './bunjang'
 import { scrapeJoonggonara } from './joonggonara'
 import { scrapeDaangn } from './daangn'
-import { isNoiseListing } from '@/lib/utils/titleFilter'
+import { isNoiseListing, isRelevantTitle } from '@/lib/utils/titleFilter'
 import { MIN_PRICE } from '@/constants'
 import type { Listing } from '@/types'
 
@@ -18,6 +18,10 @@ export async function scrapeAll(keyword: string): Promise<Omit<Listing, 'id' | '
   if (joonggonara.status === 'fulfilled') results.push(...joonggonara.value)
   if (daangn.status === 'fulfilled') results.push(...daangn.value)
 
-  // 노이즈 제거: 매입/구매글 + 미끼 가격(1000원 미만)
-  return results.filter(item => !isNoiseListing(item.title) && item.price >= MIN_PRICE)
+  // 노이즈 제거: 매입/구매글 + 미끼 가격 + 키워드 무관 결과
+  return results.filter(item =>
+    !isNoiseListing(item.title) &&
+    item.price >= MIN_PRICE &&
+    isRelevantTitle(item.title, keyword)
+  )
 }

@@ -64,9 +64,9 @@ export default function ListingTable({ listings }: Props) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-base">거래 목록 ({listings.length}건)</CardTitle>
+        <CardTitle className="text-lg">거래 목록 ({listings.length}건)</CardTitle>
         <Select value={sort} onValueChange={v => setSort(v as SortKey)}>
-          <SelectTrigger className="w-[130px] h-8 text-xs">
+          <SelectTrigger className="w-[130px] h-9 text-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -78,22 +78,22 @@ export default function ListingTable({ listings }: Props) {
         </Select>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
+        <div className="divide-y">
           {sorted.map(listing => (
             <a
               key={listing.id}
               href={listing.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex gap-3 p-2 sm:p-3 rounded-lg hover:bg-muted/50 transition-colors"
+              className="flex gap-3 py-4 px-2 sm:px-3 hover:bg-muted/50 transition-colors"
             >
-              <div className="hidden sm:block flex-shrink-0 w-[60px] h-[60px] rounded-md overflow-hidden bg-muted">
+              <div className="hidden sm:block flex-shrink-0 w-[72px] h-[72px] rounded-md overflow-hidden bg-muted">
                 {listing.thumbnail_url ? (
                   <Image
                     src={listing.thumbnail_url}
                     alt={listing.title}
-                    width={60}
-                    height={60}
+                    width={72}
+                    height={72}
                     className="object-cover w-full h-full"
                     unoptimized
                   />
@@ -104,8 +104,8 @@ export default function ListingTable({ listings }: Props) {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{listing.title}</p>
-                <div className="flex items-center gap-2 mt-1">
+                <p className="text-[15px] font-medium truncate">{listing.title}</p>
+                <div className="flex items-center gap-2 mt-2">
                   <PlatformBadge platform={listing.platform} />
                   {listing.sold_at && (
                     <span className="text-xs text-muted-foreground">
@@ -115,7 +115,7 @@ export default function ListingTable({ listings }: Props) {
                 </div>
               </div>
               <div className="flex-shrink-0 text-right">
-                <p className="text-sm font-bold text-indigo-600">
+                <p className="text-[15px] font-bold text-indigo-600">
                   {listing.price.toLocaleString('ko-KR')}원
                 </p>
               </div>
