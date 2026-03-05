@@ -29,6 +29,7 @@ export async function scrapeJoonggonara(keyword: string): Promise<Omit<Listing, 
       const searchUrl = `${BASE_URL}/search/${encodeURIComponent(keyword)}?sort=RECENT_SORT&page=${page}&saleYn=SALE_Y&quantity=50`
       const res = await fetch(searchUrl, {
         headers: { 'User-Agent': 'Mozilla/5.0' },
+        signal: AbortSignal.timeout(8000),
       })
 
       if (!res.ok) {

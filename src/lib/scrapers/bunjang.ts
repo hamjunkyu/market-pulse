@@ -20,6 +20,7 @@ export async function scrapeBunjang(keyword: string): Promise<Omit<Listing, 'id'
     const url = `${API_URL}?q=${encodeURIComponent(keyword)}&order=date&page=0&n=${MAX_ITEMS_PER_PLATFORM}`
     const res = await fetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0' },
+      signal: AbortSignal.timeout(8000),
     })
 
     if (!res.ok) {
