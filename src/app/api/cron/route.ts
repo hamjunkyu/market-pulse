@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
     for (const keyword of keywords) {
       try {
-        const listings = await scrapeAll(keyword)
+        const { listings } = await scrapeAll(keyword)
         await upsertListings(listings)
 
         const byPlatform = Map.groupBy(listings, l => l.platform)

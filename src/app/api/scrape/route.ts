@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '검색어가 비어있습니다.' }, { status: 400 })
     }
 
-    const listings = await scrapeAll(keyword)
+    const { listings, failedPlatforms } = await scrapeAll(keyword)
     await upsertListings(listings)
 
     // 플랫폼별로 수집 범위 내 사라진 리스팅을 DB에서 삭제
@@ -44,7 +44,11 @@ export async function POST(req: NextRequest) {
 
     await updateScrapedAt(keyword)
 
-    return NextResponse.json({ success: true, count: listings.length })
+    return NextResponse.json({
+      success: true,
+      count: listings.length,
+      failedPlatforms,
+    })
   } catch (e) {
     console.error('수집 API 에러:', e)
     return NextResponse.json({ error: '수집 중 오류가 발생했습니다.' }, { status: 500 })

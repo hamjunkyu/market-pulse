@@ -12,9 +12,11 @@ import ListingTable from '@/components/ListingTable'
 import LoadingState from '@/components/LoadingState'
 import EmptyState from '@/components/EmptyState'
 import ErrorState from '@/components/ErrorState'
+import ErrorBoundary from '@/components/ErrorBoundary'
 import { calcStats, calcTrend, filterByIQR } from '@/lib/utils/priceStats'
 import { clusterListings } from '@/lib/utils/clustering'
-import type { SearchResult } from '@/types'
+import { PLATFORMS } from '@/constants'
+import type { Platform, SearchResult } from '@/types'
 
 function SearchContent() {
   const searchParams = useSearchParams()
@@ -35,6 +37,7 @@ function SearchContent() {
   const [data, setData] = useState<SearchResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [scraping, setScraping] = useState(false)
+  const [failedPlatforms, setFailedPlatforms] = useState<Platform[]>([])
   const [error, setError] = useState<string | null>(null)
   const requestIdRef = useRef(0)
 
@@ -55,13 +58,18 @@ function SearchContent() {
       // 캐시 만료 또는 신규 키워드면 백그라운드 수집
       if (result.isStale) {
         setScraping(true)
+        setFailedPlatforms([])
         fetch('/api/scrape', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ keyword }),
         })
-          .then(res => {
+          .then(async res => {
             if (!res.ok) throw new Error('수집 실패')
+            const scrapeResult = await res.json()
+            if (scrapeResult.failedPlatforms?.length > 0) {
+              setFailedPlatforms(scrapeResult.failedPlatforms)
+            }
             // 수집 완료 후 현재 필터 기준으로 재조회
             const freshParams = new URLSearchParams(window.location.search)
             return fetch(`/api/search?${freshParams}`)
@@ -183,6 +191,13 @@ function SearchContent() {
           </div>
         </div>
       )}
+      {failedPlatforms.length > 0 && (
+        <div className="text-center py-2.5 bg-amber-50 border border-amber-200 rounded-lg">
+          <span className="text-sm text-amber-700">
+            {failedPlatforms.map(p => PLATFORMS[p].label).join(', ')} 수집에 실패했습니다. 해당 플랫폼 데이터가 누락될 수 있습니다.
+          </span>
+        </div>
+      )}
       {isCollecting ? <LoadingState /> : (
         <>
           <ProductGroupTabs
@@ -216,9 +231,11 @@ export default function SearchPage() {
               <FilterBar />
             </Suspense>
           </div>
-          <Suspense fallback={<LoadingState />}>
-            <SearchContent />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingState />}>
+              <SearchContent />
+            </Suspense>
+          </ErrorBoundary>
         </div>
       </div>
     </main>
