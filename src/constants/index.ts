@@ -5,14 +5,14 @@ export const PLATFORMS = {
 } as const
 
 export const POPULAR_KEYWORDS = [
-  '아이폰 15',
-  '갤럭시 S24',
-  '에어팟 프로',
-  '닌텐도 스위치',
+  '아이폰 16',
+  '갤럭시 S25',
   '맥북 프로',
+  '에어팟 프로',
+  '아이패드',
+  '닌텐도 스위치 2',
+  '다이슨',
   '플레이스테이션 5',
-  '다이슨 에어랩',
-  '애플워치',
 ]
 
 export const SCRAPE_CACHE_TTL_HOURS = 6   // 6시간 캐시

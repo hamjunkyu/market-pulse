@@ -45,7 +45,7 @@ export default function SearchBar({ defaultValue = '' }: SearchBarProps) {
           value={query}
           onChange={e => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="pl-12 h-14 !text-lg"
+          className="pl-12 h-14 !text-lg bg-white"
         />
       </div>
       <Button

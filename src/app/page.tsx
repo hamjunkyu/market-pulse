@@ -2,8 +2,16 @@ import Link from 'next/link'
 import SearchBar from '@/components/SearchBar'
 import RecentSearches from '@/components/RecentSearches'
 import { POPULAR_KEYWORDS } from '@/constants'
+import { getPopularKeywords } from '@/lib/db/queries'
 
-export default function HomePage() {
+export default async function HomePage() {
+  let keywords: string[]
+  try {
+    const dbKeywords = await getPopularKeywords()
+    keywords = dbKeywords.length >= 8 ? dbKeywords : POPULAR_KEYWORDS
+  } catch {
+    keywords = POPULAR_KEYWORDS
+  }
   return (
     <main className="min-h-[calc(100vh-3rem)] bg-gradient-to-b from-indigo-50/60 to-background flex flex-col items-center justify-center px-4">
       <div className="w-full max-w-2xl flex flex-col items-center gap-10">
@@ -25,7 +33,7 @@ export default function HomePage() {
           <div>
             <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2.5">인기 검색어</p>
             <div className="flex flex-wrap gap-2.5">
-              {POPULAR_KEYWORDS.map(keyword => (
+              {keywords.map(keyword => (
                 <Link
                   key={keyword}
                   href={`/search?keyword=${encodeURIComponent(keyword)}`}
