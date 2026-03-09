@@ -8,7 +8,10 @@ export default async function HomePage() {
   let keywords: string[]
   try {
     const dbKeywords = await getPopularKeywords()
-    keywords = dbKeywords.length >= 8 ? dbKeywords : POPULAR_KEYWORDS
+    // DB 키워드로 채우고, 부족한 자리는 하드코딩 목록에서 보충
+    const dbSet = new Set(dbKeywords)
+    const fallback = POPULAR_KEYWORDS.filter(k => !dbSet.has(k))
+    keywords = [...dbKeywords, ...fallback].slice(0, 8)
   } catch {
     keywords = POPULAR_KEYWORDS
   }

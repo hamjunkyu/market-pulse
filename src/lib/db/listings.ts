@@ -7,10 +7,18 @@ export async function upsertListings(
   listings: Omit<Listing, 'id' | 'created_at'>[]
 ): Promise<void> {
   if (listings.length === 0) return
+
+  // platform+url 기준 중복 제거 (나중 항목 우선)
+  const seen = new Map<string, Omit<Listing, 'id' | 'created_at'>>()
+  for (const l of listings) {
+    seen.set(`${l.platform}:${l.url}`, l)
+  }
+  const unique = [...seen.values()]
+
   const db = createServerClient()
   const { error } = await db
     .from('listings')
-    .upsert(listings, { onConflict: 'platform,url', ignoreDuplicates: false })
+    .upsert(unique, { onConflict: 'platform,url', ignoreDuplicates: false })
   if (error) throw error
 }
 

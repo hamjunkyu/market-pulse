@@ -27,12 +27,15 @@ export function isStale(lastScrapedAt: Date | null): boolean {
   return hoursAgo > SCRAPE_CACHE_TTL_HOURS
 }
 
-// 인기 검색어 (검색 횟수 기준 상위 N개)
+// 인기 검색어 (검색 횟수 기준 상위 N개, 최소 횟수 이상만)
+const POPULAR_MIN_COUNT = 5
+
 export async function getPopularKeywords(limit = 8): Promise<string[]> {
   const db = createServerClient()
   const { data, error } = await db
     .from('search_queries')
     .select('keyword')
+    .gte('scrape_count', POPULAR_MIN_COUNT)
     .order('scrape_count', { ascending: false })
     .limit(limit)
   if (error) throw error
