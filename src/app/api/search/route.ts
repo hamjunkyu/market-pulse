@@ -41,9 +41,14 @@ export async function GET(req: NextRequest) {
       condition: parsed.data.condition,
     }
 
+    const removedDefaults = searchParams.get('removedDefaults')
+    const allowedKeywords = removedDefaults
+      ? removedDefaults.split(',').map(s => s.trim()).filter(Boolean)
+      : undefined
+
     const lastScrapedAt = await getLastScrapedAt(keyword)
     const rawListings = await getListings(keyword, filters)
-    const listings = rawListings.filter(l => !isNoiseListing(l.title) && isRelevantTitle(l.title, keyword))
+    const listings = rawListings.filter(l => !isNoiseListing(l.title, allowedKeywords) && isRelevantTitle(l.title, keyword))
     const prices = listings.map(l => l.price)
 
     const result: SearchResult = {

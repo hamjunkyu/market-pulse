@@ -12,10 +12,13 @@ export function filterByIQR(prices: number[]): number[] {
 }
 
 // IQR 필터링 후 평균 계산
-function iqrAvg(prices: number[]): number {
+function iqrAvg(prices: number[]): { avg: number; count: number } {
   const filtered = filterByIQR(prices)
-  if (filtered.length === 0) return 0
-  return Math.round(filtered.reduce((s, p) => s + p, 0) / filtered.length)
+  if (filtered.length === 0) return { avg: 0, count: 0 }
+  return {
+    avg: Math.round(filtered.reduce((s, p) => s + p, 0) / filtered.length),
+    count: filtered.length,
+  }
 }
 
 // IQR 이상치 제거 후 통계 계산
@@ -50,10 +53,9 @@ export function calcTrend(listings: Listing[]): TrendPoint[] {
     byDate[date].push(l.price)
   }
   return Object.entries(byDate)
-    .map(([date, prices]) => ({
-      date,
-      avg: iqrAvg(prices),
-      count: prices.length,
-    }))
+    .map(([date, prices]) => {
+      const { avg, count } = iqrAvg(prices)
+      return { date, avg, count }
+    })
     .sort((a, b) => a.date.localeCompare(b.date))
 }

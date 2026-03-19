@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import {
   BarChart,
   Bar,
@@ -10,7 +11,6 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface Props {
   prices: number[]
@@ -53,18 +53,16 @@ function buildBins(prices: number[], binCount: number) {
 }
 
 export default function PriceDistributionChart({ prices, avg }: Props) {
+  const [open, setOpen] = useState(false)
+
   if (prices.length < 3) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">가격 분포</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            분포를 표시하려면 3건 이상의 데이터가 필요합니다.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="bg-card rounded-xl border shadow-sm px-4 py-3">
+        <h3 className="text-lg font-semibold">가격 분포</h3>
+        <p className="text-sm text-muted-foreground mt-1">
+          분포를 표시하려면 3건 이상의 데이터가 필요합니다.
+        </p>
+      </div>
     )
   }
 
@@ -72,42 +70,57 @@ export default function PriceDistributionChart({ prices, avg }: Props) {
   const bins = buildBins(prices, binCount)
 
   return (
-    <Card className="py-4 gap-2">
-      <CardHeader className="px-4">
-        <CardTitle className="text-lg">가격 분포</CardTitle>
-      </CardHeader>
-      <CardContent className="px-4">
-        <ResponsiveContainer width="100%" height={280}>
-          <BarChart data={bins} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis
-              dataKey="range"
-              fontSize={13}
-              interval={0}
-              tickLine={false}
-            />
-            <YAxis fontSize={13} allowDecimals={false} width={35} />
-            <Tooltip
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              formatter={(value: any, _name: any, props: any) => {
-                if (value == null) return ['', '']
-                return [`${value}건`, props?.payload?.range ?? '거래 수']
-              }}
-            />
-            <ReferenceLine
-              x={bins.find(b => avg >= b.from && avg <= b.to)?.range}
-              stroke="#4f46e5"
-              strokeDasharray="4 4"
-              label={{ value: '평균', position: 'top', fontSize: 11, fill: '#4f46e5' }}
-            />
-            <Bar
-              dataKey="count"
-              fill="#818cf8"
-              radius={[4, 4, 0, 0]}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </Card>
+    <div className="bg-card rounded-xl border shadow-sm">
+      <button
+        type="button"
+        onClick={() => setOpen(prev => !prev)}
+        className="w-full flex items-center justify-between px-4 py-3 cursor-pointer select-none"
+      >
+        <h3 className="text-lg font-semibold">가격 분포</h3>
+        <svg
+          className={`h-4 w-4 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="px-4 pb-4">
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={bins} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis
+                dataKey="range"
+                fontSize={13}
+                interval={0}
+                tickLine={false}
+              />
+              <YAxis fontSize={13} allowDecimals={false} width={35} />
+              <Tooltip
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                formatter={(value: any, _name: any, props: any) => {
+                  if (value == null) return ['', '']
+                  return [`${value}건`, props?.payload?.range ?? '거래 수']
+                }}
+              />
+              <ReferenceLine
+                x={bins.find(b => avg >= b.from && avg <= b.to)?.range}
+                stroke="#4f46e5"
+                strokeDasharray="4 4"
+                label={{ value: '평균', position: 'top', fontSize: 11, fill: '#4f46e5' }}
+              />
+              <Bar
+                dataKey="count"
+                fill="#818cf8"
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
   )
 }

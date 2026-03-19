@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef, useMemo, Suspense } from 'rea
 import { useSearchParams } from 'next/navigation'
 import SearchBar from '@/components/SearchBar'
 import FilterBar from '@/components/FilterBar'
+import PriceRangeSlider from '@/components/PriceRangeSlider'
 import ProductGroupTabs from '@/components/ProductGroupTabs'
 import PriceSummaryCards from '@/components/PriceSummaryCards'
 import PriceTrendChart from '@/components/PriceTrendChart'
@@ -25,6 +26,7 @@ function SearchContent() {
   const days = searchParams.get('days') || '30'
   const condition = searchParams.get('condition') || 'all'
   const exclude = searchParams.get('exclude') || ''
+  const removedDefaults = searchParams.get('removedDefaults') || ''
 
   // 동적 페이지 타이틀
   useEffect(() => {
@@ -48,6 +50,7 @@ function SearchContent() {
     setError(null)
     try {
       const params = new URLSearchParams({ keyword, platform, days, condition })
+      if (removedDefaults) params.set('removedDefaults', removedDefaults)
       const res = await fetch(`/api/search?${params}`)
       if (!res.ok) throw new Error('검색 실패')
       const result: SearchResult = await res.json()
@@ -96,13 +99,16 @@ function SearchContent() {
         setLoading(false)
       }
     }
-  }, [keyword, platform, days, condition])
+  }, [keyword, platform, days, condition, removedDefaults])
 
   useEffect(() => {
     fetchData()
   }, [fetchData])
 
-  // 제외 키워드 클라이언트 필터링 + 통계 재계산 (Hook은 early return 전에 호출)
+  const minPrice = searchParams.get('minPrice')
+  const maxPrice = searchParams.get('maxPrice')
+
+  // 제외 키워드 + 가격 범위 클라이언트 필터링 + 통계 재계산 (Hook은 early return 전에 호출)
   const filtered = useMemo(() => {
     if (!data) return null
     const excludeTerms = exclude
@@ -110,19 +116,26 @@ function SearchContent() {
       .map(s => s.trim().toLowerCase())
       .filter(Boolean)
 
-    if (excludeTerms.length === 0) return data
+    const minP = minPrice ? Number(minPrice) : null
+    const maxP = maxPrice ? Number(maxPrice) : null
 
-    const listings = data.listings.filter(
-      l => !excludeTerms.some(term => l.title.toLowerCase().includes(term))
-    )
+    const listings = data.listings.filter(l => {
+      if (excludeTerms.length > 0 && excludeTerms.some(term => l.title.toLowerCase().includes(term))) return false
+      if (minP !== null && l.price < minP) return false
+      if (maxP !== null && l.price > maxP) return false
+      return true
+    })
     const prices = listings.map(l => l.price)
+
+    if (excludeTerms.length === 0 && minP === null && maxP === null) return data
+
     return {
       ...data,
       stats: calcStats(prices),
       trend: calcTrend(listings),
       listings,
     }
-  }, [data, exclude])
+  }, [data, exclude, minPrice, maxPrice])
 
   // 제품 그룹 클러스터링
   const groups = useMemo(() => {
@@ -131,6 +144,13 @@ function SearchContent() {
   }, [filtered, keyword])
 
   const [activeGroup, setActiveGroup] = useState<string | null>(null)
+
+  // 원본 데이터 기준 가격 범위 (슬라이더용)
+  const priceRange = useMemo(() => {
+    if (!data || data.listings.length === 0) return undefined
+    const prices = data.listings.map(l => l.price)
+    return { min: Math.min(...prices), max: Math.max(...prices) }
+  }, [data])
 
   // 데이터 변경 시 그룹 선택 초기화
   useEffect(() => {
@@ -207,8 +227,15 @@ function SearchContent() {
             keyword={keyword}
           />
           <PriceSummaryCards stats={view.stats} listings={view.listings} scrapedAt={filtered.scrapedAt} />
+
           <PriceTrendChart trend={view.trend} />
           <PriceDistributionChart prices={filterByIQR(view.listings.map(l => l.price))} avg={view.stats.avg} />
+
+          {/* 필터 → 가격범위 → 리스팅 */}
+          <div className="bg-card rounded-xl border shadow-sm p-4">
+            <FilterBar />
+          </div>
+          {priceRange && <PriceRangeSlider priceRange={priceRange} />}
           <ListingTable listings={view.listings} />
         </>
       )}
@@ -221,15 +248,12 @@ export default function SearchPage() {
     <main className="min-h-screen bg-gradient-to-b from-indigo-50/50 to-background">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="flex flex-col gap-4">
-          <div className="bg-card rounded-xl border shadow-sm p-4 space-y-3">
+          <div className="bg-card rounded-xl border shadow-sm p-4 space-y-3 mb-2">
             <div className="flex justify-center">
               <Suspense>
                 <SearchBarWithParams />
               </Suspense>
             </div>
-            <Suspense>
-              <FilterBar />
-            </Suspense>
           </div>
           <ErrorBoundary>
             <Suspense fallback={<LoadingState />}>
@@ -245,5 +269,5 @@ export default function SearchPage() {
 function SearchBarWithParams() {
   const searchParams = useSearchParams()
   const keyword = searchParams.get('keyword') || ''
-  return <SearchBar defaultValue={keyword} />
+  return <SearchBar defaultValue={keyword} compact />
 }

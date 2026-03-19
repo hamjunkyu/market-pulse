@@ -8,9 +8,10 @@ import { Button } from '@/components/ui/button'
 
 interface SearchBarProps {
   defaultValue?: string
+  compact?: boolean
 }
 
-export default function SearchBar({ defaultValue = '' }: SearchBarProps) {
+export default function SearchBar({ defaultValue = '', compact = false }: SearchBarProps) {
   const [query, setQuery] = useState(defaultValue)
   const router = useRouter()
 
@@ -37,7 +38,7 @@ export default function SearchBar({ defaultValue = '' }: SearchBarProps) {
   return (
     <div className="flex w-full max-w-2xl gap-2">
       <div className="relative flex-1">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" aria-hidden="true" />
+        <Search className={`absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground ${compact ? 'h-4.5 w-4.5' : 'h-5 w-5'}`} aria-hidden="true" />
         <Input
           type="text"
           placeholder="검색어를 입력하세요 (예: 아이폰 15)"
@@ -45,13 +46,16 @@ export default function SearchBar({ defaultValue = '' }: SearchBarProps) {
           value={query}
           onChange={e => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="pl-12 h-14 !text-lg bg-white"
+          className={compact ? 'pl-11 h-12 text-[1.0625rem] bg-white' : 'pl-12 h-14 !text-lg bg-white'}
         />
       </div>
       <Button
         onClick={handleSearch}
         disabled={!query.trim()}
-        className="h-14 px-8 text-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+        className={compact
+          ? 'h-12 px-6 text-base bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50'
+          : 'h-14 px-8 text-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50'
+        }
       >
         검색
       </Button>
